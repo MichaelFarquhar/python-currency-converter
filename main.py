@@ -1,7 +1,9 @@
 from prompt_toolkit import prompt
 from prompt_toolkit.completion import WordCompleter
 from prompt_toolkit.validation import Validator, ValidationError
+
 import sys
+import api
 
 def quit_program():
     print('\nQuitting...')
@@ -30,9 +32,10 @@ def main():
     print('[TAB] - See full list of currencies')
     print('[Q] - Quit')
     print("")
-    html_completer = WordCompleter(['usd', 'cad', 'jap', 'aus'])
-    text = prompt('Enter Currency: ', completer=html_completer, complete_while_typing=True, validator=NumberValidator(), validate_while_typing=False)
-    print('You said: %s' % text)
+    api.get_status()
+    # html_completer = WordCompleter(['usd', 'cad', 'jap', 'aus'])
+    # text = prompt('Enter Currency: ', completer=html_completer, complete_while_typing=True, validator=NumberValidator(), validate_while_typing=False)
+    # print('You said: %s' % text)
 
 if __name__ == "__main__":
     main()

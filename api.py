@@ -37,6 +37,14 @@ def get_status():
     table = [[str(x) for x in data['quotas']['month'].values()]]
     print(tabulate(table, table_headers, tablefmt="pretty"))
 
+class NumberValidation(Validator):
+    def validate(self, document):
+        text = document.text.strip()
+        
+        # Handle error for non-numeric
+        if not text.isdigit():
+            raise ValidationError(message='Please enter a valid number.', cursor_position=len(text))
+
 class CurrencyValidation(Validator):
     def validate(self, document):
         text = document.text.strip()
@@ -49,8 +57,36 @@ class CurrencyValidation(Validator):
         if text.upper() not in currency_codes:
             raise ValidationError(message='Please enter a valid currency.', cursor_position=len(text))
 
+def get_convertion(base: str, conversion: str, amount: float):
+    '''Receives a base and conversion currency. Makes call to api to get the conversion rate'''
+    # Make request to api 'latest' endpoint
+    resp = start_request("latest?apikey={}&currencies={}&base_currency={}".format(os.environ['API_KEY'], conversion, base))
+    data = resp.json()
+
+    # Calculate Amount
+    converted_amount = amount * float(data['data'][conversion]['value'])
+
+    # Print out amount in a pretty table format
+    print("")
+    table_headers = ["Conversion Complete"]
+    table = [[f"\n{base} ${amount} -> {conversion} ${round(converted_amount, 2)}"]]
+    print(tabulate(table, table_headers, tablefmt="pretty"))
+
+
 def convert_currency():
     '''Recieve various inputs and then makes a call to api to convert currency'''
+
+    style.print_title('Convert Currency')
+    print("[TAB] -> See all currency options\n")
+
+    # Base currency prompt
     html_completer = WordCompleter([c.lower() for c in currency_codes])
-    text = prompt('Enter Currency: ', completer=html_completer, complete_while_typing=True, validator=CurrencyValidation(), validate_while_typing=False)
-    print('You said: %s' % text)
+    base_currency = prompt('Enter Base Currency: ', completer=html_completer, complete_while_typing=True, validator=CurrencyValidation(), validate_while_typing=False)
+
+    # Conversion to convert to prompt
+    conversion_currency = prompt('Enter Conversion Currency: ', completer=html_completer, complete_while_typing=True, validator=CurrencyValidation(), validate_while_typing=False)
+
+    # Enter amount prompt
+    amount = prompt('Enter Amount: ', validator=NumberValidation(), validate_while_typing=True)
+
+    get_convertion(base_currency.upper(), conversion_currency.upper(), float(amount))

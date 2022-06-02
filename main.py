@@ -1,6 +1,6 @@
 from prompt_toolkit import prompt
 from prompt_toolkit.validation import Validator, ValidationError
-
+import os
 import sys
 import api
 import style
@@ -30,6 +30,7 @@ def main():
         print("[1] Convert Currency\n[2] See Api Status\n[3] Quit\n")
         menu_selection = prompt('Enter number: ', validator=MainMenuValidator())
 
+        os.system('clear||cls')
         # [1] Start currency conversion
         if int(menu_selection) == 1:
             api.convert_currency()

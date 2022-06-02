@@ -1,41 +1,45 @@
 from prompt_toolkit import prompt
-from prompt_toolkit.completion import WordCompleter
 from prompt_toolkit.validation import Validator, ValidationError
 
 import sys
 import api
+import style
 
 def quit_program():
+    '''Quits program while printing a message'''
     print('\nQuitting...')
     sys.exit()
 
-class NumberValidator(Validator):
+class MainMenuValidator(Validator):
+    '''Validator for Main Menu - Only allow the user to select options 1, 2 or 3'''
     def validate(self, document):
-        currency_list = {'cad', 'usd'}
+        options = {'1','2','3'}
         text = document.text
 
-        # If q is entered, quit
-        if text.lower() == 'q':
-            quit_program()
-
-        # Handle no input
-        if len(text.strip()) <= 0:
-            raise ValidationError(message='Please enter a currency code.')
-        
-        # Handle incorrect currency entered
-        if text.lower() not in currency_list:
-            raise ValidationError(message='Please enter a valid currency.', cursor_position=len(text))
+        if text.strip() not in options:
+            raise ValidationError(message='Please enter a valid option.')
 
 def main():
-    print('\nCURRENCY CONVERTER')
-    print('─' * 18)
-    print('[TAB] - See full list of currencies')
-    print('[Q] - Quit')
-    print("")
-    api.get_status()
-    # html_completer = WordCompleter(['usd', 'cad', 'jap', 'aus'])
-    # text = prompt('Enter Currency: ', completer=html_completer, complete_while_typing=True, validator=NumberValidator(), validate_while_typing=False)
-    # print('You said: %s' % text)
+    # Main Menu
+    # Loop endless until the users pick the quit option from the main menu
+    while True:
+        # Menu title
+        style.print_title('Main Menu')
+
+        # Menu options and input
+        print("[1] Convert Currency\n[2] See Api Status\n[3] Quit\n")
+        menu_selection = prompt('Enter number: ', validator=MainMenuValidator())
+
+        # [1] Start currency conversion
+        if int(menu_selection) == 1:
+            api.convert_currency()
+        # [2] See the current api quota
+        elif int(menu_selection) == 2:
+            api.get_status()
+        # [3] Quit program
+        elif int(menu_selection) == 3:
+            quit_program()
+
 
 if __name__ == "__main__":
     main()
